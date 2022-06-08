@@ -1,9 +1,8 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import styles from '../styles/Home.module.css'
+import styles from '../../styles/Home.module.css'
 import Web3 from 'web3'
-import { contractAbi, contractAddress } from './config'
+import { contractAbi, contractAddress } from '../config'
 
 const web3 = new Web3(Web3.givenProvider)
 
