@@ -48,6 +48,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
+        <div>connected address: {Web3.givenProvider?.selectedAddress || '-'}</div>
         <h1 className={styles.title}>
           Workshop web3 blockchain, only 1 gwei!
         </h1>
