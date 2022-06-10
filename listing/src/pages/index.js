@@ -1,42 +1,33 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import styles from '../../styles/Home.module.css'
+import { useEthers, useContractFunction, useCall } from '@usedapp/core'
+import { Contract, utils } from 'ethers'
 import Web3 from 'web3'
 import { contractAbi, contractAddress } from '../config'
 
-const web3 = new Web3(Web3.givenProvider)
-
 export default function Home() {
-  const [member, setMember] = useState({})
+  const { activateBrowserWallet, account } = useEthers()
   const [name, setName] = useState()
   const [referral, setReferral] = useState()
 
-  const workshopContract = new web3.eth.Contract(contractAbi, contractAddress)
+  const contractWorkshop = new Contract(contractAddress, new utils.Interface(contractAbi))
 
-  const handleConnect = () => {
-    Web3.givenProvider.request({ method: 'eth_requestAccounts' })
-  }
+  const { send: sendRegistration } = useContractFunction(contractWorkshop, 'registration')
+  const { value: member } = useCall({
+    contract: contractWorkshop,
+    method: 'members',
+    args: [account]
+  }) ?? {}
+
+  const handleConnect = () => activateBrowserWallet()
 
   useEffect(() => {
     handleConnect()
-    handleGetMember()
   }, [])
 
-  const handleGetMember = async () => {
-    console.log(Web3.givenProvider?.selectedAddress)
-    const _member = await workshopContract.methods.members(Web3.givenProvider?.selectedAddress).call()
-    setMember(_member)
-  }
-
   const handleRegistration = () => {
-    workshopContract.methods.registration(name, referral || '0x0000000000000000000000000000000000000000')
-      .send({ from: Web3.givenProvider?.selectedAddress, value: 10 ** 9 })
-      .on('receipt', () => {
-        alert('Sukses')
-      })
-      .on('error', () => {
-        alert('Error')
-      })
+    sendRegistration(name, referral || '0x0000000000000000000000000000000000000000', { value: 10 ** 9 })
   }
 
   return (
@@ -54,7 +45,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          {member.isMember ? `${member.name} already registered!` : ''}
+          {member?.['isMember'] ? `${member?.['name']} already registered!` : ''}
         </p>
 
         <div>
